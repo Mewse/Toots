@@ -1,1 +1,1 @@
-docker run -it --rm --network mongo --name mongo mongo mongo --host mongo$1
+docker run -it --rm --network mongo --name mongo-cli mongo mongo --host mongo-toot-$1
