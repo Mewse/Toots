@@ -24,7 +24,7 @@ Manually configuring and initialising a MongoDB replicaset.
 To create a non persistent mongo node we can simply start a standard container:
 ```docker run -d --rm --name mongo-toot mongo```
 This will start a mongo instance running with a default mongo configuration on port 27017 inside a container called mongo-toot.
-To connect to this we need to know the ip address of the container. To find this you can either inspect the container: ```docker inspect mongo-toot``` or you can check the contents of `/etc/hosts` inside the container with: ```docker exec mongo-toots /bin/bash -c 'cat /etc/hosts'```
+To connect to this we need to know the ip address of the container. To find this you can either inspect the container: ```docker inspect mongo-toot``` or you can check the contents of `/etc/hosts` inside the container with: ```docker exec mongo-toot /bin/bash -c 'cat /etc/hosts'```
 
 This should give you an output similar to the following: 
 ```
@@ -62,7 +62,7 @@ Now exit the mongo-cli container and `docker kill` the `mongo-toot` container.
 Restarting and reconnecting to the new container will now present you with an uninitiated replicaset. The database you just created is also missing. This is because, by default, the data is stored inside the container on a volatile filesystem.
 To make it stick, we need to mount a volume from our local file system to use as persistent storage. Make sure to use the absolute path for the volume so that you don't accidentally mount the wrong thing. Mount the volume using the command:
 ```
-docker run -d --rm -v $PWD/data1:/data/db -v $PWD/mongod.conf:/etc/mongod.conf --name mongo-toot mongo
+docker run -d --rm -v $PWD/data1:/data/db --name mongo-toot mongo
 ```
 Now try to insert a document, kill the container, and then see if it still exists the next time you turn it on. It should be there! You now have a persitent volume that can safely contain a copy of your database. You could now extend this to be a highly available and reliable unit of storage, but that is well beyond the scope of this tutorial.
 
@@ -74,7 +74,7 @@ To mount a local file into a container we use the `-v local:remote` argument. Fo
 This will mount the file in the current directory into the container as `/etc/mongod.conf`
 You might think that just mounting this file would make mongod use it for configuration but, confusingly, you'd be wrong. For some reason container mongo does not seem to match RPM mongo in this regard, so instead we need to point it in the right direction. This is done through the use of a parameter that we shall pass into the container at startup. The complete startup string with the mount point and parameter is as follows:
 
-```docker run -d --rm -v $(pwd)/mongod.conf:/etc/mongod.conf --name mongo-toot mongo --config/etc/mongod.conf```
+```docker run -d --rm -v $(pwd)/mongod.conf:/etc/mongod.conf --name mongo-toot mongo --config /etc/mongod.conf```
  
 How exciting! It does exactly the same thing as before, but now it does it because you told it to.
 
